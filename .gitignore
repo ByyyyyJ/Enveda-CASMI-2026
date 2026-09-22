@@ -179,3 +179,9 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# CASMI competition data and generated local artifacts
+data/raw/
+data/processed/
+artifacts/
+submission.csv
