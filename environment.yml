@@ -2,6 +2,7 @@ name: casmi2026
 channels:
   - conda-forge
 dependencies:
-  - python=3.11
-  - rdkit
+  # Matches the Kaggle notebook image (Python 3.12). RDKit comes from PyPI via pyproject.toml,
+  # pinned to the official metric's version.
+  - python=3.12
   - pip

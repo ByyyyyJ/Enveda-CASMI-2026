@@ -7,11 +7,13 @@ Local, reproducible preparation workspace for the Kaggle competition **Enveda CA
 The prepared environment is named `casmi2026`. To recreate it on this Windows machine:
 
 ```powershell
-conda env create -f environment.yml
+# Python 3.12 to match the Kaggle image. --override-channels avoids Anaconda's default
+# channels (their Terms of Service are not accepted on this machine).
+conda create -n casmi2026 --override-channels -c conda-forge python=3.12 pip -y
 conda activate casmi2026
 python -m pip install uv
 $env:UV_PROJECT_ENVIRONMENT = $env:CONDA_PREFIX
-uv sync --system-certs --no-install-project
+uv sync --system-certs --no-install-project   # installs rdkit==2026.3.3, pinned to the official metric
 python -m ipykernel install --user --name casmi2026 --display-name "Python (casmi2026)"
 ```
 

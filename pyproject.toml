@@ -3,7 +3,7 @@ name = "casmi2026"
 version = "0.1.0"
 description = "Reproducible local workflow for Enveda CASMI 2026"
 readme = "README.md"
-requires-python = ">=3.11,<3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "ipykernel>=6.29",
     "jupyterlab>=4.2",
@@ -15,6 +15,8 @@ dependencies = [
     "pyarrow>=17",
     "pyteomics>=4.7",
     "pytest>=8.3",
+    # Pinned to the version used by the official CASMI metric; tautomer canonicalization differs across releases.
+    "rdkit==2026.3.3",
     "ruff>=0.6",
     "torch==2.7.0",
     "torchmetrics>=1.5",
@@ -31,4 +33,4 @@ torch = { index = "pytorch-cu128" }
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
