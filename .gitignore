@@ -183,5 +183,8 @@ cython_debug/
 # CASMI competition data and generated local artifacts
 data/raw/
 data/processed/
+data/external/
 artifacts/
 submission.csv
+data/splits/
+.claude/
