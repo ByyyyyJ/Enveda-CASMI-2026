@@ -8,7 +8,8 @@ InChIKey14, one per line), the frozen 0.465 pipeline inside the notebook is patc
   Engine 2   its COCONUT / ChEBI / LIPID MAPS / PubChemLite / training-structure store drops them;
   PubChem    they no longer count as pool structures, so the PubChem channel may list them, and the
              best pool score (a gate input) is taken over the remaining window only.
-Without CASMI_HIDE_KEYS the patches do nothing. The frozen source is re-encoded and its pinned
+With CASMI_HIDE_SCOPE=e1 the Engine 2 store keeps them (answers in ChEBI / LIPID MAPS / PubChemLite but
+not in the Engine 1 pool). Without CASMI_HIDE_KEYS the patches do nothing. The frozen source is re-encoded and its pinned
 SHA-256 updated, so the notebook's own integrity checks still pass.
 
 Usage: python scripts/make_hidden_notebook.py
@@ -39,7 +40,7 @@ if os.environ.get('CASMI_HIDE_KEYS'):
 
 HIDE_E2 = """
 # ---- local validation only: hide answers from the Engine 2 store (CASMI_HIDE_KEYS) ----
-if os.environ.get('CASMI_HIDE_KEYS'):
+if os.environ.get('CASMI_HIDE_KEYS') and os.environ.get('CASMI_HIDE_SCOPE', 'all') != 'e1':
     _p = os.path.join(ENG_DIR, 'casmi_engine.py'); _s = open(_p).read()
     _old = '    P = dict(fp=fp[o], mass=mass[o], keys=keys[o], smiles=smis[o])'
     assert _s.count(_old) == 1, 'casmi_engine.build_pool changed'
