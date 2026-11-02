@@ -3,7 +3,8 @@
 Usage: python isomer_train.py [VAL_FOLD] [EPOCHS] [TAG]
 Train on the other identity folds (enveda-np-examples excluded), validate on VAL_FOLD by ranking the true
 structure among every same-formula structure in the table. TAG "ext" adds the candidate-database structures
-(isomer_pool.py) as negatives and draws half of each query's negatives from its most similar isomers.
+(isomer_pool.py) as negatives and draws half of each query's negatives from its most similar isomers among 64
+sampled; TAG "hard" scans 512 and takes the 12 most similar plus 4 random.
 Writes D:/casmi-data/isomer/model_f{VAL_FOLD}[_TAG].pt after every epoch.
 """
 import math
@@ -23,15 +24,15 @@ from casmi.paths import EXTERNAL  # noqa: E402
 VAL = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 EPOCHS = int(sys.argv[2]) if len(sys.argv) > 2 else 6
 TAG = sys.argv[3] if len(sys.argv) > 3 else ""
-K, B, SCAN = 16, 256, 64
-HARD = K // 2 if TAG == "ext" else 0
+K, B = 16, 256
+SCAN, HARD = {"ext": (64, K // 2), "hard": (512, 12)}.get(TAG, (64, 0))
 DATA = EXTERNAL / "isomer"
 dev = "cuda"
 torch.manual_seed(0)
 rng = np.random.default_rng(0)
 
 S = np.load(DATA / "spectra.npz")
-suffix = "_ext" if TAG == "ext" else ""
+suffix = "_ext" if TAG in ("ext", "hard") else ""
 st = pd.read_parquet(DATA / f"structures{suffix}.parquet")
 fp = torch.from_numpy(np.load(DATA / f"fp{suffix}.npy"))
 n_add = len(pd.read_csv(DATA / "adducts.csv"))
@@ -69,7 +70,7 @@ def struct(six):
 
 def tanimoto(a, b):
     """Binary Tanimoto between a (n, bits) and b (n, m, bits) on the GPU."""
-    a = (a > 0).float(); b = (b > 0).float()
+    a = (a > 0).half(); b = (b > 0).half()
     inter = torch.einsum("nd,nmd->nm", a, b)
     return inter / (a.sum(-1, keepdim=True) + b.sum(-1) - inter).clamp(min=1)
 
