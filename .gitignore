@@ -188,3 +188,11 @@ artifacts/
 submission.csv
 data/splits/
 .claude/
+
+# Copies of other people's public notebooks and local-only variants of them: never commit
+notebooks/pub477/
+notebooks/pub477_absence/
+notebooks/midx479/
+notebooks/midx479_icetims/
+notebooks/local_midx479/
+notebooks/local_midx479_icetims/
