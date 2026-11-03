@@ -15,6 +15,7 @@ mkdir -p "$OUT"
 if [ -n "$OVR" ]; then export OVERRIDES=$EXT/overrides/$OVR; else unset OVERRIDES; fi
 bash "$REPO/scripts/wsl_run_notebook.sh" "$NB" "$OUT/run.log" "$EXT/pseudo/$MODE" || exit 1
 cp /kaggle/working/*.csv /kaggle/working/*.json /kaggle/working/*.log /kaggle/working/*.parquet "$OUT/" 2>/dev/null
+if [ -d /kaggle/working/variants ]; then mkdir -p "$OUT/variants"; cp /kaggle/working/variants/*.csv "$OUT/variants/" 2>/dev/null; fi
 cp /kaggle/working/ice_work/ice_out.json "$OUT/ice_out.json" 2>/dev/null
 cp /kaggle/working/gl_work/gl_out.json "$OUT/gl_out.json" 2>/dev/null
 

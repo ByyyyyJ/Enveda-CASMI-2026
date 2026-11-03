@@ -27,6 +27,12 @@ for s in casmi26-fold-safe-fpnet casmi26-natural-product-knowledge-table \
          casmi26-attributed-v4g-reproduction-assets; do
   link dmitriigluzdov "$s"
 done
+[ -d "$EXT/rdkit-2026-3-3-wheel" ] && link metric rdkit-2026-3-3-wheel
+# ICE_TIMS=1 mounts our timsTOF-tuned ICEBERG package under its Kaggle dataset name.
+if [ "${ICE_TIMS:-0}" = 1 ]; then
+  mkdir -p /kaggle/input/datasets/wyy817
+  cp -rs "$EXT/ice_tims_pkg" /kaggle/input/datasets/wyy817/casmi26-iceberg-tims
+fi
 
 # Optional input overrides (e.g. leak removal for validation): OVERRIDES=<dir> holds files at paths
 # relative to /kaggle/input that replace the originals, plus REMOVE.txt listing paths to delete.
