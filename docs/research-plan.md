@@ -205,6 +205,32 @@ e2_last 公开榜 0.469（V2 0.468），几乎不变。这不能否定新假设�
 - 最后一试（TAG hard）：每个查询从同分子式组里扫 512 个结构，取指纹最像的 12 个加 4 个随机当负例。f0np 上排对答案 51 个（流水线 139），同分子式组重排后的 MRR 0.372（流水线 0.669）。对调第 1、2 名：阈值 0.05 时对 5 错 5，阈值 0.1 时对 0 错 1。没有净收益，这个模型彻底放弃。
 - 教训：验证的负例必须来自流水线候选本身。从候选库随机抽的负例太容易，验证分数虚高。
 
+### 2026-11-02：ICEBERG 强度模型的 timsTOF 微调
+
+流水线用的 ICEBERG 是 MassSpecGym msg_all 检查点，训练数据里没有 timsTOF，推理时把 timsTOF 当 QTOF 处理。这里冻结生成模型，只微调强度模型；timsTOF 改用模型里原本几乎不用的 "Unknown" 仪器格。脚本：
+- `ice_env.py`：在进程内复用资产里 ice_runner 的环境，RDKit 2025.03.6，WSL 下运行；
+- `ice_panel.py`、`ice_panel_run.py`、`ice_replay.py`、`ice_np_split.py`：构建数据和评估面板；
+- `ice_finetune.py`：微调；
+- `ice_eval.py`、`ice_compare.py`：评估和配对比较。
+
+两个评估面板：
+- **f0**：fold 0 的 enveda-180 类药分子，300 个，每个配 16 个同分子式候选。
+- **np-lib**：流水线在 np-lib 上的前 25 名里与第 1 名同分子式的组，204 个分子有覆盖。这组候选正是 ICEBERG 在流水线里实际要排的。
+
+各设置和原版（timsTOF 当 QTOF）的配对对比：
+
+| 设置 | f0 MRR 差（95% CI） | np-lib MRR 差（95% CI） |
+|---|---|---|
+| 只把 timsTOF 改成 Unknown | +0.015（+0.001, +0.029） | +0.005（−0.033, +0.044） |
+| 只用 enveda-180 微调（ft1） | +0.040（+0.017, +0.064） | −0.074（−0.119, −0.029） |
+| enveda-180 加 50% MassSpecGym 回放（ft2r） | +0.028（+0.006, +0.050） | −0.008（−0.055, +0.038） |
+| 再加 np-examples（两折交叉验证，ft3cv） | — | −0.003（−0.049, +0.039） |
+
+- f0 上第一名准确率：原版 0.780，ft1 0.847，ft2r 0.830。
+- ft1 在 np-lib 上变差有一部分是混杂：250 个 np-examples 结构里有 236 个在 MassSpecGym 里，只用 enveda-180 微调会冲淡原检查点对这些结构的记忆。加回放后这个损失就没了。
+- 结论：微调对类药分子的异构体排序有显著帮助，对天然产物没有可测的效果。
+- 上榜：ft2r 打包成私有数据集 `wyy817/casmi26-iceberg-tims`（`make_ice_package.py`），挂到 0.479 笔记本上（`make_ice_notebook.py`，kernel `wyy817/casmi26-midx479-icetims`），提交一次。
+
 ## 4. 相关的公开工作
 
 公开 pipeline 作者的 `casmi26-natural-product-panel-benchmark` 已有单通道的手调门控：`gate_eval.py` / `merge_eval.py` 在 lib / nospec / dbdrop 三个场景下，决定 PubChem 通道的第一名能否占第 1 位（规则 `S > 6 且 pop ≥ 5`）。区别：
